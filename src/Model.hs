@@ -7,23 +7,24 @@ data Token = TArrow | TDot | TComma | TGo | TTake | TMark | TNothing | TTurn | T
   TEmpty | TLambda | TDebris | TAsteroid | TBoundary | TUnderscore | 
   TIdent String deriving (Eq,Show)
 
+
 -- Exercise 2
-data Program = Program [Rule] deriving (Eq,Show)
-data Rule = Rule  deriving (Eq,Show)
-data Cmds = Cmds deriving (Eq,Show)
+type Program =  [Rule] 
+data Rule = Rule String Cmds deriving (Eq,Show)
+type Cmds = [Cmd] 
 data Cmd = Go 
   | Take 
   | Mark 
-  | Nothing 
+  | Nothin
   | Turn Dir 
   | Case Dir Alts 
   | Ident String deriving (Eq,Show)
-data Dir = Left 
-  | Right 
+data Dir = Lef
+  | Righ 
   | Front deriving (Eq,Show)
-data Alts = Alts [Alt] deriving (Eq,Show)
-data Alt = Alt Pat Cmds deriving (Eq,Show)
-data Pat = Empty 
+type Alts =  [Alt] 
+data Alt = Alt Contents Cmds deriving (Eq,Show)
+data Contents = Empty 
   | Lambda 
   | Debris 
   | Asteroid 

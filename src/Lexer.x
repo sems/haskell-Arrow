@@ -37,32 +37,6 @@ tokens :-
 
 
 {
--- Each action has type :: String -> Token
--- The token type:
-data Token =
-  TArrow | 
-  TDot | 
-  TComma | 
-  TGo | 
-  TTake | 
-  TMark | 
-  TNothing | 
-  TTurn | 
-  TCase | 
-  TOf | 
-  TEnd | 
-  TLeft | 
-  TRight | 
-  TFront | 
-  TSemicolon | 
-  TEmpty | 
-  TLambda | 
-  TDebris | 
-  TAsteroid | 
-  TBoundary | 
-  TUnderscore | 
-  TIdent String
-  deriving (Eq,Show)
 
 main = do
   s <- getContents

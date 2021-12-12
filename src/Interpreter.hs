@@ -15,7 +15,6 @@ import Model
 import Algebra
 
 
-data Contents  =  Empty | Lambda | Debris | Asteroid | Boundary
 
 type Size      =  Int
 type Pos       =  (Int, Int)
