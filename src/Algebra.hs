@@ -2,9 +2,8 @@ module Algebra where
 
 import Model
 
-
 -- Exercise 5
-type Algebra rule cmds cmd dir alts alt contents program = (
+type Algebra program rule cmds cmd dir alts alt contents = (
     [rule] -> program, -- Program
     String -> cmds -> rule, -- Rule
     [cmd] -> cmds, -- Cmds
@@ -27,32 +26,29 @@ type Algebra rule cmds cmd dir alts alt contents program = (
     contents -- Underscore Contents
   )
 
-fold :: Algebra rule cmds cmd dir alts alt contents program -> Program -> program
-fold (aProgram, aRule, aCmds, aTake, aMark, aNothing, aTurn, aCase, aIdent, aLeft, aRight, aFront, aAlts, aAlt, aEmpty, aLambda, aDebris, aAsteroid, aBoundary, aUnderscore) p = f p
+fold :: Algebra program rule cmds cmd dir alts alt contents -> Program -> program
+fold (aProgram, aRule, aCmds, aTake, aMark, aNothing, aTurn, aCase, aIdent, aLeft, aRight, aFront, aAlts, aAlt, aEmpty, aLambda, aDebris, aAsteroid, aBoundary, aUnderscore) = fProg
   where
-    f (Program rules) = aProgram (map f rules) -- Program
-    f (Rule str cmds) = aRule str (f cmds) -- Rule
-    f (Cmds cmds) = aCmds (map f cmds) -- Cmds
-    f (Take) = aTake
-    f (Mark) = aMark
-    f (Nothin) = aNothing
-    f (Turn dir) = aTurn (f dir)
-    f (Case dir alts) = aCase (f dir) (map f alts)
-    f (Ident str) = aIdent str
-    f (Lef) = aLef
-    f (Righ) = aRight
-    f (Fron) = aFront
-    f (Alts alts) = aAlts (map f alts)
-    f (Alt contents cmds) = aAlt (f contents) (f cmds)
-    f (Empty) = aEmpty
-    f (Lambda) = aLambda
-    f (Debris) = aDebris
-    f (Asteroid) = aAsteroid
-    f (Boundary) = aBoundary
-    f (Underscore) = aUnderscore
-    
-
-
+    fProg (Program rules) = aProgram (map fRule rules) -- Program
+    fRule (Rule str cmds) = aRule str (fCmds cmds) -- Rule
+    fCmds (Cmds cmds) = aCmds (map fCmd cmds) -- Cmds
+    fCmd Take = aTake
+    fCmd Mark = aMark
+    fCmd Nothin = aNothing
+    fCmd (Turn dir) = aTurn (fDir dir)
+    fCmd (Case dir alts) = aCase (fDir dir) (fAlts alts)
+    fCmd (Ident str) = aIdent str
+    fDir Lef = aLeft
+    fDir Righ = aRight
+    fDir Fron = aFront
+    fAlts (Alts alts) = aAlts (map fAlt alts)
+    fAlt (Alt contents cmds) = aAlt (fCon contents) (fCmds cmds)
+    fCon Empty = aEmpty
+    fCon Lambda = aLambda
+    fCon Debris = aDebris
+    fCon Asteroid = aAsteroid
+    fCon Boundary = aBoundary
+    fCon Underscore = aUnderscore
 
 -- Exercise 6
 
