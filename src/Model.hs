@@ -9,9 +9,9 @@ data Token = TArrow | TDot | TComma | TGo | TTake | TMark | TNothing | TTurn | T
 
 
 -- Exercise 2
-type Program =  [Rule] 
+data Program = Program [Rule] deriving (Eq,Show)
 data Rule = Rule String Cmds deriving (Eq,Show)
-type Cmds = [Cmd] 
+data Cmds = Cmds [Cmd]  deriving (Eq,Show)
 data Cmd = Go 
   | Take 
   | Mark 
@@ -21,8 +21,9 @@ data Cmd = Go
   | Ident String deriving (Eq,Show)
 data Dir = Lef
   | Righ 
-  | Front deriving (Eq,Show)
-type Alts =  [Alt] 
+  | Fron deriving (Eq,Show)
+data Alts = Alts [Alt]  deriving (Eq,Show)
+
 data Alt = Alt Contents Cmds deriving (Eq,Show)
 data Contents = Empty 
   | Lambda 
