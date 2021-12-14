@@ -45,9 +45,17 @@ contentsTable =  [ (Empty   , '.' )
                  , (Asteroid, 'O' )
                  , (Boundary, '#' )]
 
+s1 :: Space
+s1 = L.fromList [ 
+    ((0,0), Empty), 
+    ((0,1), Lambda),
+    ((0,2), Debris),
+    ((0,3), Asteroid)
+  ]
+
 -- Exercise 7
 printSpace :: Space -> String
-printSpace s = printHeader ++ undefined
+printSpace s = printHeader
   where
     printHeader = show (maximum (L.keys s)) ++ "\n"
     printRow r = map (showContents . snd) (filter (\((_, y),_) -> y == r) (L.toList s)) ++ "\n"
