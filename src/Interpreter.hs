@@ -17,6 +17,18 @@ import Data.List (intercalate)
 import Data.Sequence (chunksOf)
 import Data.Maybe (fromJust)
 
+filepath :: FilePath 
+filepath = "examples/Add.arrow"
+
+
+test = do   -- test for ex 6 (looking good)
+    file <- readFile filepath
+    let lexed = alexScanTokens file
+    let parsed = foo lexed
+    let p =checkProgram parsed
+    print p
+
+
 type Size      =  Int
 type Pos       =  (Int, Int)
 type Space     =  Map Pos Contents

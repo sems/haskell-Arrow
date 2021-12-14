@@ -8,6 +8,7 @@ type Algebra program rule cmds cmd dir alts alt contents = (
     [rule] -> program, -- Program
     String -> cmds -> rule, -- Rule
     [cmd] -> cmds, -- Cmds
+    cmd, -- Go Cmd
     cmd, -- Take Cmd
     cmd, -- Mark Cmd
     cmd, -- Nothin Cmd
@@ -28,7 +29,7 @@ type Algebra program rule cmds cmd dir alts alt contents = (
   )
 
 algCheck :: Algebra Bool (Bool,String,[String]) (Bool,[String]) (Bool,[String]) Dir (Bool,[String]) (Bool,Contents,[String]) Contents
-algCheck = (fprogram ,frule, fcmds, (True,[]), (True,[]), (True, [] ), fturn, fcase, fident, Lef, Righ, Fron, falts, falt, Empty, Lambda, Debris, Asteroid, Boundary, Underscore )    
+algCheck = (fprogram ,frule, fcmds, (True,[]),(True,[]), (True,[]), (True, [] ), fturn, fcase, fident, Lef, Righ, Fron, falts, falt, Empty, Lambda, Debris, Asteroid, Boundary, Underscore )    
 
 fprogram :: [(Bool,String,[String])] -> Bool
 fprogram p = checkprog p [] []
@@ -49,7 +50,6 @@ fcmds = checkCmds []
   where checkCmds _ ((False,_):_) = (False,[]) 
         checkCmds ss [] = (True,ss)
         checkCmds ts ((_,ss):xs) = checkCmds (ts++ss) xs
-
 
 fturn :: Dir -> (Bool,[String])
 fturn d = (True,[])
@@ -73,11 +73,12 @@ falt c (False,_) = (False,c,[])
 falt c (b,ss) = (b,c,ss)
 
 fold :: Algebra program rule cmds cmd dir alts alt contents -> Program -> program
-fold (aProgram, aRule, aCmds, aTake, aMark, aNothing, aTurn, aCase, aIdent, aLeft, aRight, aFront, aAlts, aAlt, aEmpty, aLambda, aDebris, aAsteroid, aBoundary, aUnderscore) = fProg
+fold (aProgram, aRule, aCmds, aGo, aTake, aMark, aNothing, aTurn, aCase, aIdent, aLeft, aRight, aFront, aAlts, aAlt, aEmpty, aLambda, aDebris, aAsteroid, aBoundary, aUnderscore) = fProg
   where
     fProg (Program rules) = aProgram (map fRule rules) -- Program
     fRule (Rule str cmds) = aRule str (fCmds cmds) -- Rule
     fCmds (Cmds cmds) = aCmds (map fCmd cmds) -- Cmds
+    fCmd Go = aGo -- Go Cmd
     fCmd Take = aTake -- Take Cmd
     fCmd Mark = aMark -- Mark Cmd
     fCmd Nothin = aNothing -- Nothin Cmd
