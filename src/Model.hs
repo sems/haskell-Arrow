@@ -30,4 +30,4 @@ data Contents = Empty
   | Debris 
   | Asteroid 
   | Boundary 
-  | Underscore deriving (Eq,Show)
+  | Underscore deriving (Eq,Show,Ord)

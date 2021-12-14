@@ -35,12 +35,14 @@ import Model
 
 
 
-Program :  Rule {  [$1] }
-        |  Program Rule {  $2 : $1}
+Program :  Rulel { Program $1}
+Rulel : Rule {[$1]}
+      | Rulel Rule {$2:$1}
 Rule : ident "->" Cmds "." {Rule $1 $3}
-Cmds : {- empty -} { []}
-     | Cmd  { [$1]}
-     | Cmds "," Cmd { $3:$1}
+Cmds : Cmdsl {Cmds $1}
+Cmdsl : {- empty -} { []}
+      | Cmd  { [$1]}
+      | Cmdsl "," Cmd { $3:$1}
 Cmd : go {Go}
     | take {Take}
     | mark {Mark}
@@ -50,10 +52,11 @@ Cmd : go {Go}
     | ident {Ident $1}
 Dir : left {Lef}
     | right {Righ}
-    | front {Front}
-Alts :  {- empty -} {[]}
-     | Alt { [$1]}
-     | Alts ";" Alt { $3:$1}
+    | front {Fron}
+Alts : Altsl {Alts $1}
+Altsl :  {- empty -} {[]}
+      | Alt { [$1]}
+      | Altsl ";" Alt { $3:$1}
 Alt : Contents "->" Cmds {Alt $1 $3}
 Contents : empty {Empty}
     | lambda {Lambda}
@@ -66,4 +69,4 @@ Contents : empty {Empty}
 
 happyError _ = error "parse error"
 
-}
+} 
