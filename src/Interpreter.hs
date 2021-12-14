@@ -13,14 +13,13 @@ import Lexer
 import Parser
 import Model
 import Algebra
-
-
+import Data.List (intercalate)
+import Data.Sequence (chunksOf)
+import Data.Maybe (fromJust)
 
 type Size      =  Int
 type Pos       =  (Int, Int)
 type Space     =  Map Pos Contents
-
-
 
 -- | Parses a space file that can be found in the examples folder.
 parseSpace :: Parser Char Space
@@ -46,11 +45,13 @@ contentsTable =  [ (Empty   , '.' )
                  , (Asteroid, 'O' )
                  , (Boundary, '#' )]
 
-
 -- Exercise 7
 printSpace :: Space -> String
-printSpace = undefined
-
+printSpace s = printHeader ++ undefined
+  where
+    printHeader = show (maximum (L.keys s)) ++ "\n"
+    printRow r = map (showContents . snd) (filter (\((_, y),_) -> y == r) (L.toList s)) ++ "\n"
+    showContents c = fromJust (lookup c contentsTable)
 
 -- These three should be defined by you
 type Ident = ()
