@@ -28,6 +28,36 @@ type Algebra program rule cmds cmd dir alts alt contents = (
     contents -- Underscore Contents
   )
 
+fold :: Algebra program rule cmds cmd dir alts alt contents -> Program -> program
+fold (aProgram, aRule, aCmds, aGo, aTake, aMark, aNothing, aTurn, aCase, aIdent, aLeft, aRight, aFront, aAlts, aAlt, aEmpty, aLambda, aDebris, aAsteroid, aBoundary, aUnderscore) = fProg
+  where
+    fProg (Program rules) = aProgram (map fRule rules) -- Program
+    fRule (Rule str cmds) = aRule str (fCmds cmds) -- Rule
+    fCmds (Cmds cmds) = aCmds (map fCmd cmds) -- Cmds
+    fCmd Go = aGo -- Go Cmd
+    fCmd Take = aTake -- Take Cmd
+    fCmd Mark = aMark -- Mark Cmd
+    fCmd Nothin = aNothing -- Nothin Cmd
+    fCmd (Turn dir) = aTurn (fDir dir) -- Turn Cmd
+    fCmd (Case dir alts) = aCase (fDir dir) (fAlts alts) -- Case Cmd
+    fCmd (Ident str) = aIdent str -- Ident Cmd
+    fDir Lef = aLeft -- Lef Dir
+    fDir Righ = aRight -- Righ Dir
+    fDir Fron = aFront-- Fron Dir
+    fAlts (Alts alts) = aAlts (map fAlt alts) -- Alts
+    fAlt (Alt contents cmds) = aAlt (fCon contents) (fCmds cmds) -- Alt
+    fCon Empty = aEmpty -- Empty Contents
+    fCon Lambda = aLambda -- Lanbda Contents
+    fCon Debris = aDebris -- Debris Contents
+    fCon Asteroid = aAsteroid -- Asteroid Contents
+    fCon Boundary = aBoundary -- Boundary Contents
+    fCon Underscore = aUnderscore -- Underscore Contents
+
+-- Exercise 6
+
+checkProgram :: Program -> Bool
+checkProgram  = fold algCheck 
+
 -- up untill the end the bool is only that will be given along the elements is an idication on whether for all present caseof's there is an possebility for patternmatch failure
 -- the list of strings that will be passed along will end in the collection of all rules that are called upon withing a command so they can be checked on said rules existance at the end
 -- any element that does not contain a caseof / Ident  will be prepresented as True / [] respectively
@@ -75,33 +105,3 @@ falts alts =  checkAlts alts [] []
 falt :: Contents ->  (Bool,[String])-> (Bool,Contents,[String]) --passed along its content toghether with bool/[string] combination from the cmd is containded
 falt c (False,_) = (False,c,[])
 falt c (b,ss) = (b,c,ss)
-
-fold :: Algebra program rule cmds cmd dir alts alt contents -> Program -> program
-fold (aProgram, aRule, aCmds, aGo, aTake, aMark, aNothing, aTurn, aCase, aIdent, aLeft, aRight, aFront, aAlts, aAlt, aEmpty, aLambda, aDebris, aAsteroid, aBoundary, aUnderscore) = fProg
-  where
-    fProg (Program rules) = aProgram (map fRule rules) -- Program
-    fRule (Rule str cmds) = aRule str (fCmds cmds) -- Rule
-    fCmds (Cmds cmds) = aCmds (map fCmd cmds) -- Cmds
-    fCmd Go = aGo -- Go Cmd
-    fCmd Take = aTake -- Take Cmd
-    fCmd Mark = aMark -- Mark Cmd
-    fCmd Nothin = aNothing -- Nothin Cmd
-    fCmd (Turn dir) = aTurn (fDir dir) -- Turn Cmd
-    fCmd (Case dir alts) = aCase (fDir dir) (fAlts alts) -- Case Cmd
-    fCmd (Ident str) = aIdent str -- Ident Cmd
-    fDir Lef = aLeft -- Lef Dir
-    fDir Righ = aRight -- Righ Dir
-    fDir Fron = aFront-- Fron Dir
-    fAlts (Alts alts) = aAlts (map fAlt alts) -- Alts
-    fAlt (Alt contents cmds) = aAlt (fCon contents) (fCmds cmds) -- Alt
-    fCon Empty = aEmpty -- Empty Contents
-    fCon Lambda = aLambda -- Lanbda Contents
-    fCon Debris = aDebris -- Debris Contents
-    fCon Asteroid = aAsteroid -- Asteroid Contents
-    fCon Boundary = aBoundary -- Boundary Contents
-    fCon Underscore = aUnderscore -- Underscore Contents
-
--- Exercise 6
-
-checkProgram :: Program -> Bool
-checkProgram  = fold algCheck 

@@ -24,7 +24,7 @@ filepath = "examples/Add.arrow"
 test = do   -- test for ex 6 (looking good)
     file <- readFile filepath
     let lexed = alexScanTokens file
-    let parsed = foo lexed
+    let parsed = parseTokens lexed
     let p =checkProgram parsed
     print p
 
@@ -74,8 +74,8 @@ printSpace s = printHeader
     showContents c = fromJust (lookup c contentsTable)
 
 -- These three should be defined by you
-type Ident = ()
-type Commands = ()
+type Ident = String
+type Commands = Cmds
 type Heading = ()
 
 type Environment = Map Ident Commands
@@ -89,7 +89,11 @@ data Step =  Done  Space Pos Heading
 
 -- | Exercise 8
 toEnvironment :: String -> Environment
-toEnvironment = undefined
+toEnvironment s  | checkProgram prog = getEnvr prog
+                 | otherwise = L.empty
+  where prog = parseTokens $ alexScanTokens s
+        getEnvr (Program rules ) = L.fromList $ map f rules
+        f (Rule s cmds) = (s,cmds)
 
 -- | Exercise 9
 step :: Environment -> ArrowState -> Step

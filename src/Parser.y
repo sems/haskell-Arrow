@@ -4,7 +4,7 @@ module Parser where
 import Model
 }
 
-%name foo
+%name parseTokens
 %tokentype { Token }
 
 %token
