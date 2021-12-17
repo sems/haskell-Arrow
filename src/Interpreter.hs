@@ -23,10 +23,8 @@ filepath = "examples/Add.arrow"
 
 test = do   -- test for ex 6 (looking good)
     file <- readFile filepath
-    let lexed = alexScanTokens file
-    let parsed = parseTokens lexed
-    let p =checkProgram parsed
-    print p
+    let e = toEnvironment file
+    print e
 
 
 type Size      =  Int
@@ -67,7 +65,7 @@ s1 = L.fromList [
 
 -- Exercise 7
 printSpace :: Space -> String
-printSpace s = printHeader
+printSpace s = printHeader 
   where
     printHeader = show (maximum (L.keys s)) ++ "\n"
     printRow r = map (showContents . snd) (filter (\((_, y),_) -> y == r) (L.toList s)) ++ "\n"
@@ -75,8 +73,8 @@ printSpace s = printHeader
 
 -- These three should be defined by you
 type Ident = String
-type Commands = Cmds
-type Heading = ()
+type Commands = [Cmd]
+data Heading = N | E | S | W deriving (Eq, Enum, Ord, Show)
 
 type Environment = Map Ident Commands
 
@@ -93,10 +91,42 @@ toEnvironment s  | checkProgram prog = getEnvr prog
                  | otherwise = L.empty
   where prog = parseTokens $ alexScanTokens s
         getEnvr (Program rules ) = L.fromList $ map f rules
-        f (Rule s cmds) = (s,cmds)
+        f (Rule s (Cmds cs)) = (s,cs)
 
 -- | Exercise 9
 step :: Environment -> ArrowState -> Step
-step = undefined
+step _ (ArrowState s p h []) = Done s p h
+step e (ArrowState s p h (Go:cs)) | elem (L.lookup newpos s) [Just Empty, Just Lambda, Just Debris] = Ok (ArrowState s newpos h cs)
+                                  | otherwise = Ok (ArrowState s p h cs)
+  where newpos = move Fron h p
+step e (ArrowState s p h (Take:cs)) = Ok (ArrowState (L.insert p Empty s) p h cs)
+step e (ArrowState s p h (Mark:cs)) = Ok (ArrowState (L.insert p Lambda s) p h cs)  
+step e (ArrowState s p h (Nothin:cs)) = Ok (ArrowState s p h cs)
+step e (ArrowState s p h (Turn d:cs)) = Ok (ArrowState s p (newHeading d h) cs)
+step e (ArrowState s p h (Case d (Alts alts):cs)) = caseOf ( L.lookup newPos s) alts
+  where caseOf _ [] = Fail "non-Exhaustive patter in caseOf"
+        caseOf Nothing ((Alt c (Cmds cmds)):xs) | c == Boundary =  Ok (ArrowState s p h (cmds++cs))
+                                                | otherwise = caseOf Nothing xs                                                                               
+        caseOf (Just cont) ((Alt c (Cmds cmds)):xs) | c == cont = Ok (ArrowState s p h (cmds++cs))
+                                                    | c == Underscore =  Ok (ArrowState s p h (cmds++cs))
+                                                    | otherwise = caseOf (Just cont) xs
+        newPos = move d h p
+step e (ArrowState s p h (Ident ident :cs)) = addRule (L.lookup ident e) 
+  where addRule Nothing = Fail ("Rule " ++ ident ++ " did not exist")
+        addRule (Just cmds) = Ok (ArrowState s p h (cmds++cs))
 
+move :: Dir -> Heading -> Pos -> Pos
+move d h p = movePos p (newHeading d h)  
+  where
+    movePos (x,y) N = (x,y+1)
+    movePos (x,y) E = (x+1,y)
+    movePos (x,y) S = (x,y-1)
+    movePos (x,y) W = (x-1,y)
+
+newHeading :: Dir -> Heading -> Heading
+newHeading Lef N = W
+newHeading Lef x = pred x
+newHeading Fron x = x
+newHeading Righ W = N
+--newHeading Righ x = succ x
 
