@@ -17,7 +17,7 @@ import Data.List (intercalate)
 import Data.Sequence (chunksOf)
 import Data.Maybe (fromJust)
 
-filepath :: FilePath 
+filepath :: FilePath
 filepath = "examples/Add.arrow"
 
 
@@ -55,21 +55,29 @@ contentsTable =  [ (Empty   , '.' )
                  , (Asteroid, 'O' )
                  , (Boundary, '#' )]
 
+-- Testing space for testing the printSpace method
 s1 :: Space
-s1 = L.fromList [ 
-    ((0,0), Empty), 
-    ((0,1), Lambda),
-    ((0,2), Debris),
-    ((0,3), Asteroid)
+s1 = L.fromList [
+    ((0,0), Empty),((1,0), Lambda),
+    ((0,1), Lambda),((1,1), Empty),
+    ((0,2), Debris),((1,2), Asteroid),
+    ((0,3), Asteroid),((1,3), Debris),
+    ((0,4), Boundary),((1,4), Boundary)
   ]
 
 -- Exercise 7
 printSpace :: Space -> String
-printSpace s = printHeader 
+printSpace s = printHeader ++ printRows 0
   where
-    printHeader = show (maximum (L.keys s)) ++ "\n"
-    printRow r = map (showContents . snd) (filter (\((_, y),_) -> y == r) (L.toList s)) ++ "\n"
+    showContents :: Contents -> Char 
     showContents c = fromJust (lookup c contentsTable)
+    -- PrintRow: first will filter the correct row (argument) to print. Then it will map to the snd in the tuple, which is of type Contents. Then it will map everything to the right string(s) and returns.
+    printRow r = map (showContents . snd) (filter (\((_, y),_) -> y == r) (L.toList s)) ++ "\n" 
+    highestInAxis :: Pos -- added typedef because it could be confusing
+    highestInAxis = fst (L.findMax s)
+    printHeader = show highestInAxis ++ "\n"
+    printRows row | row <= snd highestInAxis = printRow row ++ printRows (row+1)
+                  | otherwise                = ""
 
 -- These three should be defined by you
 type Ident = String
@@ -100,23 +108,23 @@ step e (ArrowState s p h (Go:cs)) | elem (L.lookup newpos s) [Just Empty, Just L
                                   | otherwise = Ok (ArrowState s p h cs)
   where newpos = move Fron h p
 step e (ArrowState s p h (Take:cs)) = Ok (ArrowState (L.insert p Empty s) p h cs)
-step e (ArrowState s p h (Mark:cs)) = Ok (ArrowState (L.insert p Lambda s) p h cs)  
+step e (ArrowState s p h (Mark:cs)) = Ok (ArrowState (L.insert p Lambda s) p h cs)
 step e (ArrowState s p h (Nothin:cs)) = Ok (ArrowState s p h cs)
 step e (ArrowState s p h (Turn d:cs)) = Ok (ArrowState s p (newHeading d h) cs)
 step e (ArrowState s p h (Case d (Alts alts):cs)) = caseOf ( L.lookup newPos s) alts
   where caseOf _ [] = Fail "non-Exhaustive patter in caseOf"
         caseOf Nothing ((Alt c (Cmds cmds)):xs) | c == Boundary =  Ok (ArrowState s p h (cmds++cs))
-                                                | otherwise = caseOf Nothing xs                                                                               
+                                                | otherwise = caseOf Nothing xs
         caseOf (Just cont) ((Alt c (Cmds cmds)):xs) | c == cont = Ok (ArrowState s p h (cmds++cs))
                                                     | c == Underscore =  Ok (ArrowState s p h (cmds++cs))
                                                     | otherwise = caseOf (Just cont) xs
         newPos = move d h p
-step e (ArrowState s p h (Ident ident :cs)) = addRule (L.lookup ident e) 
+step e (ArrowState s p h (Ident ident :cs)) = addRule (L.lookup ident e)
   where addRule Nothing = Fail ("Rule " ++ ident ++ " did not exist")
         addRule (Just cmds) = Ok (ArrowState s p h (cmds++cs))
 
 move :: Dir -> Heading -> Pos -> Pos
-move d h p = movePos p (newHeading d h)  
+move d h p = movePos p (newHeading d h)
   where
     movePos (x,y) N = (x,y+1)
     movePos (x,y) E = (x+1,y)
