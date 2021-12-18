@@ -5,7 +5,6 @@ import Prelude hiding ((<*), (<$))
 
 import Data.Map (Map)
 import qualified Data.Map as L
-
 import Data.Char (isSpace)
 import Control.Monad (replicateM)
 
@@ -13,23 +12,22 @@ import Lexer
 import Parser
 import Model
 import Algebra
-import Data.List (intercalate)
+import Data.List (intercalate,sort)
 import Data.Sequence (chunksOf)
 import Data.Maybe (fromJust)
-
-filepath :: FilePath
-filepath = "examples/Add.arrow"
-
-
-test = do   -- test for ex 6 (looking good)
-    file <- readFile filepath
-    let e = toEnvironment file
-    print e
 
 
 type Size      =  Int
 type Pos       =  (Int, Int)
 type Space     =  Map Pos Contents
+
+run :: Parser a Space -> [a] -> Space -- copied from the Icalander assignment (Later adjusted)
+run p input = getOutput (parse p input)
+    where 
+        getOutput [] = L.empty
+        getOutput ((x,[]):_) =  x
+        getOutput (_:ys) = getOutput ys
+
 
 -- | Parses a space file that can be found in the examples folder.
 parseSpace :: Parser Char Space
@@ -65,6 +63,8 @@ s1 = L.fromList [
     ((0,4), Boundary),((1,4), Boundary)
   ]
 
+
+
 -- Exercise 7
 printSpace :: Space -> String
 printSpace s = printHeader ++ printRows 0
@@ -99,7 +99,7 @@ toEnvironment s  | checkProgram prog = getEnvr prog
                  | otherwise = L.empty
   where prog = parseTokens $ alexScanTokens s
         getEnvr (Program rules ) = L.fromList $ map f rules
-        f (Rule s (Cmds cs)) = (s,cs)
+        f (Rule s (Cmds cs)) = (s,reverse cs)
 
 -- | Exercise 9
 step :: Environment -> ArrowState -> Step
@@ -111,12 +111,13 @@ step e (ArrowState s p h (Take:cs)) = Ok (ArrowState (L.insert p Empty s) p h cs
 step e (ArrowState s p h (Mark:cs)) = Ok (ArrowState (L.insert p Lambda s) p h cs)
 step e (ArrowState s p h (Nothin:cs)) = Ok (ArrowState s p h cs)
 step e (ArrowState s p h (Turn d:cs)) = Ok (ArrowState s p (newHeading d h) cs)
-step e (ArrowState s p h (Case d (Alts alts):cs)) = caseOf ( L.lookup newPos s) alts
+step e (ArrowState s p h (Case d (Alts alts):cs)) = caseOf ( L.lookup newPos s) (reverse alts)
   where caseOf _ [] = Fail "non-Exhaustive patter in caseOf"
-        caseOf Nothing ((Alt c (Cmds cmds)):xs) | c == Boundary =  Ok (ArrowState s p h (cmds++cs))
+        caseOf Nothing ((Alt c (Cmds cmds)):xs) | c == Boundary =  Ok (ArrowState s p h (reverse cmds++cs))
+                                                | c == Underscore =  Ok (ArrowState s p h (reverse cmds++cs))
                                                 | otherwise = caseOf Nothing xs
-        caseOf (Just cont) ((Alt c (Cmds cmds)):xs) | c == cont = Ok (ArrowState s p h (cmds++cs))
-                                                    | c == Underscore =  Ok (ArrowState s p h (cmds++cs))
+        caseOf (Just cont) ((Alt c (Cmds cmds)):xs) | c == cont = Ok (ArrowState s p h (reverse cmds++cs))
+                                                    | c == Underscore =  Ok (ArrowState s p h (reverse cmds++cs))
                                                     | otherwise = caseOf (Just cont) xs
         newPos = move d h p
 step e (ArrowState s p h (Ident ident :cs)) = addRule (L.lookup ident e)
@@ -126,9 +127,9 @@ step e (ArrowState s p h (Ident ident :cs)) = addRule (L.lookup ident e)
 move :: Dir -> Heading -> Pos -> Pos
 move d h p = movePos p (newHeading d h)
   where
-    movePos (x,y) N = (x,y+1)
+    movePos (x,y) N = (x,y-1)
     movePos (x,y) E = (x+1,y)
-    movePos (x,y) S = (x,y-1)
+    movePos (x,y) S = (x,y+1)
     movePos (x,y) W = (x-1,y)
 
 newHeading :: Dir -> Heading -> Heading
@@ -136,5 +137,5 @@ newHeading Lef N = W
 newHeading Lef x = pred x
 newHeading Fron x = x
 newHeading Righ W = N
---newHeading Righ x = succ x
+newHeading Righ x = succ x
 
