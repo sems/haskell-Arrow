@@ -95,11 +95,13 @@ fident s = (True,[s])
 
 falts :: [(Bool,Contents,[String])] -> (Bool,[String]) -- checks whether all contents(or an underscore) is incuded among the alts meaning the patternmatching within the case is non-exhaustive 
 falts alts =  checkAlts alts [] []
-  where checkAlts :: [(Bool,Contents,[String])] -> [Contents] -> [String] -> (Bool,[String])
-        checkAlts [] cs ss = (checkContents,ss)
-          where checkContents = elem Underscore cs || sort cs == [Empty,Lambda,Debris,Asteroid,Boundary]
-        checkAlts ((False,_, _):_) _ _= (False,[])
-        checkAlts ((_,c,ss):xs) cs ts = checkAlts xs (c:cs) (ss++ts)
+  where 
+    checkAlts :: [(Bool,Contents,[String])] -> [Contents] -> [String] -> (Bool,[String])
+    checkAlts [] cs ss = (checkContents,ss)
+      where 
+        checkContents = elem Underscore cs || sort cs == [Empty,Lambda,Debris,Asteroid,Boundary]
+    checkAlts ((False,_, _):_) _ _= (False,[])
+    checkAlts ((_,c,ss):xs) cs ts = checkAlts xs (c:cs) (ss++ts)
 
 falt :: Contents ->  (Bool,[String])-> (Bool,Contents,[String]) --passed along its content toghether with bool/[string] combination from the cmd is containded
 falt c (False,_) = (False,c,[])
