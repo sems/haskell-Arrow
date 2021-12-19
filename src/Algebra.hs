@@ -54,7 +54,6 @@ fold (aProgram, aRule, aCmds, aGo, aTake, aMark, aNothing, aTurn, aCase, aIdent,
     fCon Underscore = aUnderscore -- Underscore Contents
 
 -- Exercise 6
-
 checkProgram :: Program -> Bool
 checkProgram  = fold algCheck 
 

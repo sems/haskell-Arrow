@@ -16,7 +16,6 @@ import Data.List (intercalate,sort)
 import Data.Sequence (chunksOf)
 import Data.Maybe (fromJust)
 
-
 type Size      =  Int
 type Pos       =  (Int, Int)
 type Space     =  Map Pos Contents
@@ -27,7 +26,6 @@ run p input = getOutput (parse p input)
         getOutput [] = L.empty
         getOutput ((x,[]):_) =  x
         getOutput (_:ys) = getOutput ys
-
 
 -- | Parses a space file that can be found in the examples folder.
 parseSpace :: Parser Char Space
@@ -62,8 +60,6 @@ s1 = L.fromList [
     ((0,3), Asteroid),((1,3), Debris),
     ((0,4), Boundary),((1,4), Boundary)
   ]
-
-
 
 -- Exercise 7
 printSpace :: Space -> String

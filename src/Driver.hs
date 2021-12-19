@@ -44,8 +44,6 @@ batch e a' = runProgram (step e a')
           runProgram (Fail s) = undefined -- there is no specification of what should be returned here in case the program fails
           runProgram (Done s p h) = (s, p, h)
 
-
-
 runProgram' :: String -> Environment -> ArrowState -> IO()
 runProgram' "b" e a = printBatch $ batch  e a
 runProgram' "i" e a = interactive e a
@@ -53,7 +51,6 @@ runProgram' _ _ _ = print "invalid input"
 
 printBatch :: (Space,Pos,Heading)  -> IO()
 printBatch (s,p,h)= print (printSpace s ++ "Pos: "++ show p++ " Head: " ++ show h)
-
 
 getHead :: String -> Heading
 getHead "N" = N

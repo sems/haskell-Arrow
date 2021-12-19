@@ -7,11 +7,10 @@ data Token = TArrow | TDot | TComma | TGo | TTake | TMark | TNothing | TTurn | T
   TEmpty | TLambda | TDebris | TAsteroid | TBoundary | TUnderscore | 
   TIdent String deriving (Eq,Show)
 
-
 -- Exercise 2
 data Program = Program [Rule] deriving (Eq,Show)
 data Rule = Rule String Cmds deriving (Eq,Show)
-data Cmds = Cmds [Cmd]  deriving (Eq,Show,Ord)
+data Cmds = Cmds [Cmd] deriving (Eq,Show,Ord)
 data Cmd = Go 
   | Take 
   | Mark 
